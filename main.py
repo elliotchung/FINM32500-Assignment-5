@@ -1,7 +1,7 @@
-from src.backtester.engine import Backtester
-from src.backtester.strategy import WindowedMovingAverageStrategy
-from src.backtester.broker import Broker
-from src.backtester.price_loader import load_prices_from_generator
+from finm32500_assignment_5.engine import Backtester
+from backtester.strategy import WindowedMovingAverageStrategy
+from backtester.broker import Broker
+from backtester.price_loader import load_prices_from_generator
 
 
 def main():

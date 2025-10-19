@@ -1,13 +1,12 @@
 import numpy as np
 import pandas as pd
 import pytest
-from backtester.strategy import WindowedMovingAverageStrategy
-from backtester.broker import Broker
+from src.backtester.strategy import WindowedMovingAverageStrategy
+from src.backtester.broker import Broker
 
 
 @pytest.fixture
 def prices():
-    # deterministic rising series
     return pd.Series(np.linspace(100, 120, 200))
 
 
