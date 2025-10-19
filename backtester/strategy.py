@@ -1,79 +1,42 @@
-from typing import override
-from collections import deque
-
+# backtester/strategy.py
 import numpy as np
+import pandas as pd
+from backtester.price_loader import load_prices_from_generator
 
-from .models import MarketDataPoint, Order, Strategy
+class WindowedMovingAverageStrategy:
 
-
-class WindowedMovingAverageStrategy(Strategy):
     def __init__(self, window: int):
-        """
-        TIME COMPLEXITY: O(1)
-        - Dictionary initialization and integer assignment are constant time
+        self.window = window
 
-        SPACE COMPLEXITY: O(1)
-        - Only allocates empty dict and stores window size
-        """
-        self.past_prices: dict[str, list[MarketDataPoint]] = {}
-        self.window: int = window
+    def signals(self, prices: pd.Series) -> pd.Series:
+        signals = pd.Series(index=prices.index, dtype=int)
+        for i in range(len(prices)):
+            if i < self.window:
+                signals.iloc[i] = 0  # Not enough data for signal
+            else:
+                windowed_prices = prices.iloc[i - self.window:i]
+                if prices.iloc[i] > windowed_prices.mean():
+                    signals.iloc[i] = 1  # Buy signal
+                elif prices.iloc[i] < windowed_prices.mean():
+                    signals.iloc[i] = -1  # Sell signal
+                else:
+                    signals.iloc[i] = 0  # Hold signal
+        return signals
 
-    def update_price(self, tick: MarketDataPoint):
-        """
-        TIME COMPLEXITY: O(1) amortized
-        - Dictionary lookup: O(1) average case
-        - List append: O(1) amortized (occasionally O(n) when resizing)
-        - List access [-1]: O(1)
-        - Equality check: O(1)
 
-        SPACE COMPLEXITY: O(1) per call
-        - Only stores reference to tick in existing list
-        - Note: Accumulated space is O(n) per symbol where n = total ticks processed
-        """
-        if tick.symbol not in self.past_prices:
-            self.past_prices[tick.symbol] = [tick]
-        elif self.past_prices[tick.symbol][-1] != tick:
-            self.past_prices[tick.symbol].append(tick)
+if __name__ == "__main__":
+    # Example usage
+    print("Loading synthetic prices for AAPL")
+    prices = load_prices_from_generator(
+        symbol="AAPL",
+        start_price=150.0,
+        num_ticks=100,
+        volatility=0.02
+    )
 
-    def calculate_average(self, symbol: str):
-        """
-        TIME COMPLEXITY: O(n) where n = len(past_prices[symbol])
-        - List comprehension over all stored prices: O(n)
-        - Array creation from list: O(n)
-        - Array slicing [-self.window:]: O(w) where w = min(window, n)
-        - np.mean over w elements: O(w)
-        - Total: O(n) dominated by list comprehension, even though we only use last w elements
+    strategy = WindowedMovingAverageStrategy(window=5)
+    signals = strategy.signals(prices)
 
-        SPACE COMPLEXITY: O(n)
-        - List comprehension creates temporary list of n floats
-        - np.array allocates array of n elements
-        - Slice creates new array of w elements
-        - Total temporary space: O(n)
-        """
-        return float(
-            np.mean(
-                np.array([p.price for p in self.past_prices[symbol]])[-self.window :]
-            )
-        )
-
-    @override
-    def generate_signal(self, tick: MarketDataPoint) -> Order:
-        """
-        TIME COMPLEXITY: O(n) where n = total ticks processed for this symbol
-        - update_price: O(1) amortized
-        - calculate_average: O(n) - dominates the complexity
-        - Order creation: O(1)
-        - Total: O(n)
-
-        SPACE COMPLEXITY: O(n)
-        - Temporary space from calculate_average: O(n)
-        - Order object: O(1)
-        """
-        self.update_price(tick)
-        return Order(
-            timestamp=tick.timestamp,
-            symbol=tick.symbol,
-            price=tick.price,
-            action="ask" if tick.price > self.calculate_average(tick.symbol) else "bid",
-            quantity=1,
-        )
+    print(f"\nGenerated {len(signals)} signals for {prices.name}")
+    print(f"\nFirst 10 signals:")
+    print(signals.head(10))
