@@ -86,7 +86,54 @@ jobs:
       - name: Add coverage to job summary
         if: always()
         run: |
-          echo "## Coverage Report" >> $GITHUB_STEP_SUMMARY
+          # Test duration badge
+          DURATION=${{ steps.tests.outputs.duration }}
+          if [ "$DURATION" -lt 30 ]; then
+            DURATION_COLOR="brightgreen"
+          elif [ "$DURATION" -lt 60 ]; then
+            DURATION_COLOR="green"
+          else
+            DURATION_COLOR="red"
+          fi
+
+          # Extract test stats from pytest results
+          if [ -f pytest-results.xml ]; then
+            TESTS=$(grep -oP 'tests="\K[^"]+' pytest-results.xml | head -1 || echo "0")
+            FAILURES=$(grep -oP 'failures="\K[^"]+' pytest-results.xml | head -1 || echo "0")
+            ERRORS=$(grep -oP 'errors="\K[^"]+' pytest-results.xml | head -1 || echo "0")
+            SKIPPED=$(grep -oP 'skipped="\K[^"]+' pytest-results.xml | head -1 || echo "0")
+            PASSED=$((TESTS - FAILURES - ERRORS - SKIPPED))
+          else
+            TESTS="0"; PASSED="0"; FAILURES="0"; ERRORS="0"; SKIPPED="0"
+          fi
+
+          # Test result color
+          if [ "$FAILURES" -eq 0 ] && [ "$ERRORS" -eq 0 ]; then
+            TEST_COLOR="brightgreen"
+          else
+            TEST_COLOR="red"
+          fi
+
+          echo "## Test & Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "![Tests](https://img.shields.io/badge/tests-${PASSED}%20passed%2C%20${FAILURES}%20failed-${TEST_COLOR})" >> $GITHUB_STEP_SUMMARY
+          echo "![Duration](https://img.shields.io/badge/duration-${DURATION}s-${DURATION_COLOR})" >> $GITHUB_STEP_SUMMARY
+
+          # Extract coverage percentage
+          COVERAGE=$(uv run coverage report | grep "^TOTAL" | awk '{print $NF}' | sed 's/%//')
+
+          # Add color-coded coverage badge
+          if (( $(echo "$COVERAGE >= 90" | bc -l) )); then
+            COLOR="brightgreen"
+          elif (( $(echo "$COVERAGE >= 70" | bc -l) )); then
+            COLOR="orange"
+          else
+            COLOR="red"
+          fi
+          echo "![Coverage](https://img.shields.io/badge/coverage-${COVERAGE}%25-${COLOR})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Detailed Coverage Report" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           uv run coverage report || true >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY

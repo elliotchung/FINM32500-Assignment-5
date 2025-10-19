@@ -1,5 +1,13 @@
 # Assigment 5: Testing & CI in Financial Engineering
 
+[![CI Pipeline](https://github.com/elliotchung/FINM32500-Assignment-5/actions/workflows/ci.yml/badge.svg)](https://github.com/elliotchung/FINM32500-Assignment-5/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-check_artifacts-blue)](https://github.com/elliotchung/FINM32500-Assignment-5/actions)
+[![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)](https://www.python.org/downloads/)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: black](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
+
 - **Duration:** ~5–6 hours
 - **Focus:** Unit tests, coverage, and CI for a minimal daily-bar backtester (PnL is *not* the goal—engineering discipline is).
 
