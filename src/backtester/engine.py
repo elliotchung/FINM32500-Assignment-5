@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 class Backtester:
     def __init__(self, strategy, broker):
         self.strategy = strategy
