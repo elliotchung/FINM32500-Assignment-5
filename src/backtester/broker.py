@@ -25,7 +25,7 @@ class Broker:
 
 
 if __name__ == "__main__":
-    from backtester.strategy import (
+    from src.backtester.strategy import (
         WindowedMovingAverageStrategy,
         load_prices_from_generator,
     )

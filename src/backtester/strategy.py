@@ -1,6 +1,6 @@
 # backtester/strategy.py
 import pandas as pd
-from backtester.price_loader import load_prices_from_generator
+from src.backtester.price_loader import load_prices_from_generator
 
 
 class WindowedMovingAverageStrategy:

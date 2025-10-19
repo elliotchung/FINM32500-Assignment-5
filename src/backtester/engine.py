@@ -48,11 +48,11 @@ class Backtester:
 
 
 if __name__ == "__main__":
-    from backtester.strategy import (
+    from src.backtester.strategy import (
         WindowedMovingAverageStrategy,
         load_prices_from_generator,
     )
-    from backtester.broker import Broker
+    from src.backtester.broker import Broker
 
     print("Running backtester example...")
     prices = load_prices_from_generator(
