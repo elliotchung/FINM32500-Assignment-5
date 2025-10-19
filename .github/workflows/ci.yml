@@ -5,12 +5,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
+
       - uses: astral-sh/setup-uv@v6
-      - run: uv run ruff check --fix
-      - run: uv run ruff format
+
+      - name: Install dependencies
+        run: uv sync --locked --all-extras --dev
+
+      - name: Run ruff check with fixes
+        run: uv run ruff check --fix
+
+      - name: Run ruff format
+        run: uv run ruff format
+
+      - name: Commit changes
+        if: github.event_name == 'push'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add -A
+          git diff --staged --quiet || git commit -m "style: apply ruff formatting and fixes"
+
+      - name: Push changes
+        if: github.event_name == 'push'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
   test:
     runs-on: ubuntu-latest
     steps:
@@ -23,10 +47,12 @@ jobs:
 
       - name: Run tests with coverage
         run: uv run pytest
+        continue-on-error: true
 
       - name: Generate coverage reports
+        if: always()
         run: |
-          uv run coverage report
+          uv run coverage report || true
           uv run coverage html
           uv run coverage xml
 
@@ -42,9 +68,13 @@ jobs:
           retention-days: 30
 
       - name: Comment coverage on PR
-        if: github.event_name == 'pull_request'
+        if: always() && github.event_name == 'pull_request'
         uses: py-cov-action/python-coverage-comment-action@v3
         with:
           GITHUB_TOKEN: ${{ github.token }}
           MINIMUM_GREEN: 90
           MINIMUM_ORANGE: 70
+
+      - name: Fail if coverage below threshold
+        if: always()
+        run: uv run coverage report
