@@ -3,8 +3,12 @@ on: [push, pull_request]
 jobs:
   ruff:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-python@v5
         with:
@@ -21,20 +25,16 @@ jobs:
       - name: Run ruff format
         run: uv run ruff format
 
-      - name: Commit changes
+      - name: Commit and push changes
         if: github.event_name == 'push'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add -A
-          git diff --staged --quiet || git commit -m "style: apply ruff formatting and fixes"
-
-      - name: Push changes
-        if: github.event_name == 'push'
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+          if ! git diff --staged --quiet; then
+            git commit -m "style: apply ruff formatting and fixes"
+            git push
+          fi
   test:
     runs-on: ubuntu-latest
     steps:
