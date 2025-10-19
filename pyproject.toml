@@ -45,6 +45,7 @@ addopts = [
     "--cov-report=term-missing",
     "--cov-report=html",
     "--cov-report=xml",
+    "--junitxml=pytest-results.xml",
 ]
 
 [tool.coverage.run]
