@@ -29,6 +29,18 @@ jobs:
       - name: Run ruff format
         run: uv run ruff format
 
+      - name: Run type checking
+        id: typecheck
+        run: |
+          if uvx ty check src/; then
+            echo "status=passing" >> $GITHUB_OUTPUT
+            echo "Type checking passed!"
+          else
+            echo "status=failing" >> $GITHUB_OUTPUT
+            echo "Type checking failed!"
+            exit 1
+          fi
+
       - name: Commit and push all auto-fixes
         if: github.event_name == 'push'
         run: |
@@ -193,6 +205,24 @@ jobs:
 
           # Download badge from shields.io
           curl -o badges/tests.svg "https://img.shields.io/badge/tests-${DURATION}s-${COLOR}"
+
+      - name: Run type checking and generate badge
+        if: always() && github.ref == 'refs/heads/master'
+        run: |
+          # Create badges directory if it doesn't exist
+          mkdir -p badges
+
+          # Run type checking
+          if uvx ty check src/; then
+            STATUS="passing"
+            COLOR="brightgreen"
+          else
+            STATUS="failing"
+            COLOR="red"
+          fi
+
+          # Download badge from shields.io
+          curl -o badges/typecheck.svg "https://img.shields.io/badge/type%20check-${STATUS}-${COLOR}"
 
       - name: Commit badges
         if: always() && github.ref == 'refs/heads/master' && github.event_name == 'push'
