@@ -2,6 +2,7 @@
 
 [![CI Pipeline](https://github.com/elliotchung/FINM32500-Assignment-5/actions/workflows/ci.yml/badge.svg)](https://github.com/elliotchung/FINM32500-Assignment-5/actions/workflows/ci.yml)
 [![Coverage](./badges/coverage.svg)](https://github.com/elliotchung/FINM32500-Assignment-5/actions)
+[![Tests](./badges/tests.svg)](https://github.com/elliotchung/FINM32500-Assignment-5/actions)
 [![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)](https://www.python.org/downloads/)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)

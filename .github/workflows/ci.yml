@@ -171,14 +171,37 @@ jobs:
           # Download badge from shields.io
           curl -o badges/coverage.svg "https://img.shields.io/badge/coverage-${COVERAGE}%25-${COLOR}"
 
-      - name: Commit coverage badge
+      - name: Generate test duration badge
+        if: always() && github.ref == 'refs/heads/master'
+        run: |
+          # Get duration from previous step
+          DURATION=${{ steps.tests.outputs.duration }}
+
+          # Determine badge color based on duration
+          if [ "$DURATION" -lt 10 ]; then
+            COLOR="brightgreen"
+          elif [ "$DURATION" -lt 30 ]; then
+            COLOR="green"
+          elif [ "$DURATION" -lt 60 ]; then
+            COLOR="yellow"
+          else
+            COLOR="red"
+          fi
+
+          # Create badges directory if it doesn't exist
+          mkdir -p badges
+
+          # Download badge from shields.io
+          curl -o badges/tests.svg "https://img.shields.io/badge/tests-${DURATION}s-${COLOR}"
+
+      - name: Commit badges
         if: always() && github.ref == 'refs/heads/master' && github.event_name == 'push'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add badges/coverage.svg
+          git add badges/*.svg
           if ! git diff --staged --quiet; then
-            git commit -m "chore: update coverage badge [skip ci]"
+            git commit -m "chore: update badges [skip ci]"
             git push
           fi
 
