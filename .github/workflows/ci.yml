@@ -180,8 +180,8 @@ jobs:
           # Create badges directory if it doesn't exist
           mkdir -p badges
 
-          # Download badge from shields.io
-          curl -o badges/coverage.svg "https://img.shields.io/badge/coverage-${COVERAGE}%25-${COLOR}"
+          # Download badge from shields.io with flat-square style and logo
+          curl -o badges/coverage.svg "https://img.shields.io/badge/Coverage-${COVERAGE}%25-${COLOR}?style=flat-square&logo=pytest&logoColor=white"
 
       - name: Generate test duration badge
         if: always() && github.ref == 'refs/heads/master'
@@ -203,8 +203,8 @@ jobs:
           # Create badges directory if it doesn't exist
           mkdir -p badges
 
-          # Download badge from shields.io
-          curl -o badges/tests.svg "https://img.shields.io/badge/tests-${DURATION}s-${COLOR}"
+          # Download badge from shields.io with flat-square style and logo
+          curl -o badges/tests.svg "https://img.shields.io/badge/Tests-${DURATION}s-${COLOR}?style=flat-square&logo=pytest&logoColor=white"
 
       - name: Run type checking and generate badge
         if: always() && github.ref == 'refs/heads/master'
@@ -221,8 +221,8 @@ jobs:
             COLOR="red"
           fi
 
-          # Download badge from shields.io
-          curl -o badges/typecheck.svg "https://img.shields.io/badge/type%20check-${STATUS}-${COLOR}"
+          # Download badge from shields.io with flat-square style and logo
+          curl -o badges/typecheck.svg "https://img.shields.io/badge/Type%20Check-${STATUS}-${COLOR}?style=flat-square&logo=python&logoColor=white"
 
       - name: Commit badges
         if: always() && github.ref == 'refs/heads/master' && github.event_name == 'push'

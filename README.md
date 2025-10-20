@@ -1,19 +1,19 @@
 # Assigment 5: Testing & CI in Financial Engineering
 
 <!-- CI/CD Status -->
-[![CI Pipeline](https://github.com/elliotchung/FINM32500-Assignment-5/actions/workflows/ci.yml/badge.svg)](https://github.com/elliotchung/FINM32500-Assignment-5/actions/workflows/ci.yml)
+[![CI Status](https://img.shields.io/github/actions/workflow/status/elliotchung/FINM32500-Assignment-5/ci.yml?branch=master&logo=github&logoColor=white&label=CI%20Pipeline&style=flat-square)](https://github.com/elliotchung/FINM32500-Assignment-5/actions/workflows/ci.yml)
 [![Coverage](./badges/coverage.svg)](https://github.com/elliotchung/FINM32500-Assignment-5/actions)
 [![Tests](./badges/tests.svg)](https://github.com/elliotchung/FINM32500-Assignment-5/actions)
 [![Type Check](./badges/typecheck.svg)](https://github.com/elliotchung/FINM32500-Assignment-5/actions)
 
 <!-- Development Tools -->
-[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
-[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![ty](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ty/main/assets/badge/v0.json)](https://docs.astral.sh/ty/)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json&style=flat-square)](https://github.com/astral-sh/uv)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json&style=flat-square)](https://github.com/astral-sh/ruff)
+[![ty](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ty/main/assets/badge/v0.json&style=flat-square)](https://docs.astral.sh/ty/)
 
 <!-- Project Info -->
-[![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square&logo=opensourceinitiative&logoColor=white)](https://opensource.org/licenses/MIT)
 
 - **Duration:** ~5–6 hours
 - **Focus:** Unit tests, coverage, and CI for a minimal daily-bar backtester (PnL is *not* the goal—engineering discipline is).
