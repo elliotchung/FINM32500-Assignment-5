@@ -15,6 +15,12 @@
 [![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square&logo=opensourceinitiative&logoColor=white)](https://opensource.org/licenses/MIT)
 
+## 📊 Coverage Report
+
+**[View Detailed HTML Coverage Report](https://github.com/elliotchung/FINM32500-Assignment-5/actions)** - Click on the latest workflow run, scroll to "Artifacts", and download `coverage-reports`. Extract and open `htmlcov/index.html` in your browser.
+
+---
+
 - **Duration:** ~5–6 hours
 - **Focus:** Unit tests, coverage, and CI for a minimal daily-bar backtester (PnL is *not* the goal—engineering discipline is).
 

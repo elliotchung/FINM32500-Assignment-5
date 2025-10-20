@@ -154,6 +154,9 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           echo "### Detailed Coverage Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📊 **[Download Full HTML Coverage Report](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts)** - Includes line-by-line coverage visualization" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           uv run coverage report || true >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
