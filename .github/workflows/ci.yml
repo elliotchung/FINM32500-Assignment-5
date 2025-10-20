@@ -18,7 +18,7 @@ jobs:
 
       - name: Compile requirements.txt
         run: |
-          uv pip compile pyproject.toml -o requirements.txt --all-extras --universal
+          uv pip compile pyproject.toml -o requirements.txt --all-extras --group dev --universal -q
 
       - name: Commit and push updated requirements.txt
         if: github.event_name == 'push'
