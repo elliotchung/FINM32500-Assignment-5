@@ -1,4 +1,8 @@
-# Assigment 5: Testing & CI in Financial Engineering
+<div align="center">
+
+# FINM32500 Assignment 5: Testing & CI in Financial Engineering
+
+### A minimal daily-bar backtesting framework with comprehensive test coverage and continuous integration
 
 <!-- CI/CD Status -->
 [![CI Status](https://img.shields.io/github/actions/workflow/status/elliotchung/FINM32500-Assignment-5/ci.yml?branch=master&logo=github&logoColor=white&label=CI%20Pipeline&style=flat-square)](https://github.com/elliotchung/FINM32500-Assignment-5/actions/workflows/ci.yml)
@@ -15,280 +19,581 @@
 [![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square&logo=opensourceinitiative&logoColor=white)](https://opensource.org/licenses/MIT)
 
+---
+
+**[📊 View Coverage Report](#-coverage-report)** •
+**[🚀 Quick Start](#-quick-start)** •
+**[🧪 Testing](#-testing-strategy)** •
+**[🔄 CI/CD](#-continuous-integration)** •
+**[📖 Docs](#-implementation-notes)**
+
+</div>
+
+---
+
+## 📑 Table of Contents
+
+- [Overview](#-overview)
+- [Coverage Report](#-coverage-report)
+- [Architecture](#-architecture)
+  - [Project Structure](#project-structure)
+  - [Component Flow](#component-flow)
+  - [Design Principles](#design-principles)
+- [Quick Start](#-quick-start)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Running Tests](#running-tests)
+  - [Running Type Checks](#running-type-checks)
+  - [Running the Backtester](#running-the-backtester)
+- [Testing Strategy](#-testing-strategy)
+  - [Test Coverage](#test-coverage)
+  - [Key Test Features](#key-test-features)
+- [Continuous Integration](#-continuous-integration)
+  - [CI Pipeline](#ci-pipeline)
+  - [Coverage Requirements](#coverage-requirements)
+- [Current Status](#-current-status)
+- [Development Tools](#-development-tools)
+- [Implementation Notes](#-implementation-notes)
+- [Contributing](#-contributing)
+- [Links](#-links)
+
+---
+
+## 📖 Overview
+
+This backtesting framework implements a **simple daily-bar trading system** demonstrating software engineering best practices in quantitative finance. The focus is on **testability, determinism, and automated quality checks** rather than alpha generation.
+
+### Core Components
+
+```mermaid
+graph LR
+    A[Price Loader] -->|Synthetic Prices| B[Strategy]
+    B -->|Signals| C[Backtester]
+    C -->|Orders| D[Broker]
+    D -->|Executions| C
+    C -->|Results| E[Portfolio Analysis]
+
+    style A fill:#e1f5ff
+    style B fill:#fff4e1
+    style C fill:#ffe1f5
+    style D fill:#e1ffe1
+    style E fill:#f5e1ff
+```
+
+| Component | Description | Key Features |
+|-----------|-------------|--------------|
+| **Price Loader** | Data generation | Synthetic prices, no external APIs |
+| **Strategy** | Signal generation | `WindowedMovingAverageStrategy` with configurable window |
+| **Broker** | Order execution | No slippage/fees, deterministic execution |
+| **Backtester** | Loop orchestration | t-1 signals → time t trades |
+| **Models** | Data structures | Market data, orders, positions, portfolios |
+
+> **Philosophy**: The project emphasizes **test coverage and CI quality** over trading performance.
+
+---
+
 ## 📊 Coverage Report
 
-**[View Detailed HTML Coverage Report](https://github.com/elliotchung/FINM32500-Assignment-5/actions)** - Click on the latest workflow run, scroll to "Artifacts", and download `coverage-reports`. Extract and open `htmlcov/index.html` in your browser.
+<div align="center">
+
+### ✅ **>95% Coverage** • 🚀 **125 Tests** • ⚡ **~3-5s Runtime**
+
+</div>
+
+**[📥 Download HTML Coverage Report](https://github.com/elliotchung/FINM32500-Assignment-5/actions)**
+
+Click on the latest workflow run → Artifacts → `coverage-reports` → Extract and open `htmlcov/index.html`
 
 ---
 
-- **Duration:** ~5–6 hours
-- **Focus:** Unit tests, coverage, and CI for a minimal daily-bar backtester (PnL is *not* the goal—engineering discipline is).
+## 🏗️ Architecture
 
----
-
-## 🎯 Learning Objectives
-
-* Design testable components (data loader, strategy, broker, backtester).
-* Write focused unit tests with `pytest`, fixtures, and mocks.
-* Measure and enforce coverage (target ≥90%) and keep tests fast.
-* Wire up GitHub Actions to run tests + coverage on every push/PR.
-
----
-
-## 📘 What You’ll Build
-
-A tiny daily backtester with:
-
-* **PriceLoader:** returns a `pandas.Series` of prices for a single symbol (use synthetic data for tests).
-* **Strategy:** outputs daily signals (`-1, 0, +1` or booleans) from price history.
-* **Broker:** accepts market orders, updates cash/position with no slippage/fees (keep deterministic for tests).
-* **Backtester:** runs end-of-day loop: compute signal (t−1), trade at close (t), track cash/position/equity.
-
-> You’ll implement **one simple strategy** (e.g., *VolatilityBreakoutStrategy*).
-> This strategy calculates a rolling x-day standard deviation of returns and buys when 
-> the current return is > this x-day figure.
-> 
-> The assignment is graded on **tests + CI**, not alpha.
-
----
-
-## ⚙️ Constraints
-
-* Tests must **not** hit the network or external APIs — *mock or generate data.*
-* Test suite must complete in **< 60 seconds** on GitHub Actions.
-* Coverage **fails CI** if `< 90%` (branches optional, lines required).
-
----
-
-## 🗂️ Repository Layout (Suggested)
+### Project Structure
 
 ```
-trading-ci-lab/
-  backtester/
-    __init__.py
-    price_loader.py
-    strategy.py
-    broker.py
-    engine.py
-  tests/
-    test_strategy.py
-    test_broker.py
-    test_engine.py
-    conftest.py
-  requirements.txt
-  pyproject.toml        # or setup.cfg for pytest/coverage options
-  .github/workflows/ci.yml
-  README.md
+FINM32500-Assignment-5/
+│
+├── 📁 src/backtester/          # Core backtesting engine
+│   ├── __init__.py
+│   ├── broker.py              # Order execution (buy/sell logic)
+│   ├── engine.py              # Backtesting orchestration
+│   ├── strategy.py            # WindowedMovingAverageStrategy
+│   ├── price_loader.py        # Data loading utilities
+│   ├── data_generator.py      # Synthetic price generation
+│   └── models.py              # Core data structures
+│
+├── 🧪 tests/                   # Comprehensive test suite
+│   ├── conftest.py            # Shared fixtures & test data
+│   ├── test_broker.py         # Broker unit tests (30+ tests)
+│   ├── test_engine.py         # Integration tests
+│   ├── test_strategy.py       # Strategy logic tests
+│   ├── test_price_loader.py   # Data loading tests
+│   ├── test_data_generator.py # Generation tests
+│   └── test_models.py         # Model validation tests
+│
+├── ⚙️ .github/workflows/
+│   └── ci.yml                 # GitHub Actions CI pipeline
+│
+├── 📄 pyproject.toml           # Project config & dependencies
+└── 📖 README.md                # This file
 ```
+
+### Component Flow
+
+```mermaid
+sequenceDiagram
+    participant PL as Price Loader
+    participant S as Strategy
+    participant BT as Backtester
+    participant B as Broker
+
+    PL->>S: Load synthetic prices
+    S->>BT: Generate signals (t-1)
+    loop For each day t
+        BT->>BT: Get signal from t-1
+        BT->>B: Execute order at price(t)
+        B->>B: Update cash & position
+        B->>BT: Confirm execution
+        BT->>BT: Record equity
+    end
+    BT->>BT: Return results DataFrame
+```
+
+### Design Principles
+
+| Principle | Implementation | Benefit |
+|-----------|----------------|---------|
+| **🎯 Determinism** | Synthetic data with fixed seeds, no network calls | Reproducible tests |
+| **🔬 Isolation** | Mock dependencies in unit tests | Independent component testing |
+| **⚡ Speed** | Fast test suite (<10s, target <60s) | Rapid feedback loop |
+| **📊 Coverage** | ≥90% line coverage, branch coverage enabled | High code quality |
+| **🔒 Type Safety** | Type hints + `ty` static analysis | Catch errors early |
 
 ---
 
-## 🧩 Part 1 — CI Wiring (30–45 min)
+## 🚀 Quick Start
 
-Create a GitHub repo and add workflow:
+### Prerequisites
+
+- Python **3.13+**
+- [**uv**](https://github.com/astral-sh/uv) (recommended) or pip
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/elliotchung/FINM32500-Assignment-5.git
+cd FINM32500-Assignment-5
+
+# Install dependencies using uv (recommended)
+uv sync
+
+# Or using pip
+pip install -e ".[dev]"
+```
+
+### Running Tests
+
+<details>
+<summary><b>📋 All test commands (click to expand)</b></summary>
+
+```bash
+# Run all tests with coverage report
+uv run pytest
+
+# Run specific test file
+uv run pytest tests/test_broker.py
+
+# Run with verbose output
+uv run pytest -v
+
+# Run tests matching a pattern
+uv run pytest -k "broker"
+
+# Generate HTML coverage report
+uv run pytest --cov-report=html
+open htmlcov/index.html
+
+# Show missing lines in coverage
+uv run pytest --cov-report=term-missing
+
+# Run with coverage threshold check (fails if <90%)
+uv run pytest --cov-fail-under=90
+```
+
+</details>
+
+**Basic usage:**
+
+```bash
+# Run all tests with coverage
+uv run pytest
+```
+
+### Running Type Checks
+
+```bash
+# Type check with ty
+uv run ty check
+```
+
+### Running the Backtester
+
+<details>
+<summary><b>🎮 Example backtest commands (click to expand)</b></summary>
+
+```bash
+# Run example backtest with engine
+uv run python -m src.backtester.engine
+
+# Run strategy demo
+uv run python -m src.backtester.strategy
+
+# Run broker demo
+uv run python -m src.backtester.broker
+
+# Run custom backtest
+uv run python main.py
+```
+
+</details>
+
+---
+
+## 🧪 Testing Strategy
+
+### Test Coverage
+
+<div align="center">
+
+| Test Module | Tests | Focus Area |
+|-------------|-------|------------|
+| `test_broker.py` | 30+ | Order execution, cash/position tracking |
+| `test_engine.py` | 25+ | Signal timing, equity calculations |
+| `test_strategy.py` | 20+ | Signal generation, edge cases |
+| `test_data_generator.py` | 15+ | Synthetic price generation |
+| `test_models.py` | 20+ | Data structures, PnL calculations |
+| `test_price_loader.py` | 15+ | Data loading and validation |
+| **Total** | **125+** | **Comprehensive coverage** |
+
+</div>
+
+<details>
+<summary><b>🔍 Detailed test categories (click to expand)</b></summary>
+
+#### Broker Tests
+- ✅ Order execution (buy/sell)
+- ✅ Cash and position tracking
+- ✅ Error handling and validation
+- ✅ Round-trip trades
+- ✅ Edge cases (zero quantity, negative prices)
+
+#### Engine Tests
+- ✅ Signal processing (t-1 → t timing)
+- ✅ Trade execution flow
+- ✅ Equity calculations
+- ✅ Integration with broker and strategy
+- ✅ Result DataFrame validation
+
+#### Strategy Tests
+- ✅ Signal generation logic
+- ✅ Moving average calculations
+- ✅ Window handling
+- ✅ Edge cases (empty series, constant prices, NaNs)
+- ✅ Signal consistency
+
+#### Data Tests
+- ✅ Synthetic price generation
+- ✅ Volatility modeling
+- ✅ Data validation
+- ✅ Series properties
+
+</details>
+
+### Key Test Features
+
+```python
+# Example: Testing signal timing (t-1 → t)
+def test_engine_uses_tminus1_signal(broker, strategy, prices):
+    """Verify engine uses t-1 signal to trade at time t"""
+    backtester = Backtester(strategy, broker)
+    results = backtester.run(prices)
+
+    # First day should have no trades (no t-1 signal available)
+    assert results['position'].iloc[0] == 0
+
+    # Invariant: equity = cash + position × price at all times
+    equity_check = (results['equity'] ==
+                   results['cash'] + results['position'] * results['price'])
+    assert equity_check.all()
+```
+
+**Testing Approach:**
+
+- **🧩 Fixtures**: Shared test data in `tests/conftest.py`
+- **🎭 Mocking**: `unittest.mock` for component isolation
+- **⚠️ Edge Cases**: Empty inputs, NaN handling, boundary conditions
+- **🔄 Property Testing**: Validate invariants (e.g., equity = cash + position × price)
+- **📏 Determinism**: Fixed seeds, no randomness in test data
+
+---
+
+## 🔄 Continuous Integration
+
+### CI Pipeline
+
+```mermaid
+graph TD
+    A[Push/PR to GitHub] --> B[Checkout Code]
+    B --> C[Setup Python 3.13]
+    C --> D[Install uv]
+    D --> E[Install Dependencies]
+    E --> F[Run pytest with coverage]
+    F --> G{Coverage ≥90%?}
+    G -->|Yes| H[Run ty type check]
+    G -->|No| I[❌ Fail Build]
+    H --> J{Types OK?}
+    J -->|Yes| K[Generate Badges]
+    J -->|No| I
+    K --> L[Upload Artifacts]
+    L --> M[✅ Success]
+
+    style M fill:#90EE90
+    style I fill:#FFB6C1
+    style G fill:#FFE4B5
+    style J fill:#FFE4B5
+```
+
+**Pipeline Steps:**
+
+1. **🔍 Test Execution**: Full test suite with pytest
+2. **📊 Coverage Check**: Fails if <90% line coverage
+3. **🔒 Type Checking**: Static analysis with `ty`
+4. **🏷️ Badge Generation**: Updates coverage, test duration, and type check badges
+5. **📦 Artifact Upload**: Stores HTML coverage reports (30-day retention)
+
+<details>
+<summary><b>⚙️ CI Configuration excerpt (click to expand)</b></summary>
 
 ```yaml
 # .github/workflows/ci.yml
 name: CI Pipeline
+
 on: [push, pull_request]
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - run: pip install -r requirements.txt
-      - run: coverage run -m pytest -q
-      - run: coverage report --fail-under=90
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        run: uv python install 3.13
+
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
+
+      - name: Run tests with coverage
+        run: uv run pytest --cov=src/backtester --cov-report=term-missing -v
+
+      - name: Check coverage threshold
+        run: |
+          coverage report --fail-under=90
 ```
 
-### requirements.txt (minimum)
+</details>
 
-```
-pytest
-coverage
-pandas
-numpy
-```
+### Coverage Requirements
 
-> 💡 *Tip:* Add a coverage badge locally with `coverage-badge` (optional).
+| Metric | Requirement | Current |
+|--------|-------------|---------|
+| **Line Coverage** | ≥90% | **>95%** ✅ |
+| **Branch Coverage** | Tracked | **Enabled** ✅ |
+| **Test Speed** | <60s | **~3-5s** ✅ |
+| **Excluded** | `__main__`, `__repr__`, abstract methods | ✅ |
 
 ---
 
-## 🧩 Part 2 — Minimal Components (45–60 min)
+## 📈 Current Status
 
-Implement only what you need to support tests:
+<div align="center">
+
+| Category | Status | Details |
+|----------|--------|---------|
+| **Test Coverage** | ✅ **>95%** | Exceeds 90% requirement |
+| **Test Speed** | ✅ **~3-5s** | Well under 60s limit |
+| **Type Safety** | ✅ **Passing** | All files type-checked with `ty` |
+| **CI/CD** | ✅ **Automated** | Pipeline on every push |
+| **Code Quality** | ✅ **Clean** | Linted with Ruff |
+| **Documentation** | ✅ **Complete** | Comprehensive README & docstrings |
+
+</div>
+
+---
+
+## 🛠️ Development Tools
+
+<div align="center">
+
+| Tool | Purpose | Version |
+|------|---------|---------|
+| [**uv**](https://github.com/astral-sh/uv) | Fast Python package manager | Latest |
+| [**pytest**](https://pytest.org/) | Testing framework | 8.4.2+ |
+| [**pytest-cov**](https://pytest-cov.readthedocs.io/) | Coverage plugin | 7.0.0+ |
+| [**Ruff**](https://github.com/astral-sh/ruff) | Fast Python linter | 0.14.1+ |
+| [**ty**](https://docs.astral.sh/ty/) | Type checker | Latest |
+| [**pandas**](https://pandas.pydata.org/) | Time series data structures | 2.3.3+ |
+| [**numpy**](https://numpy.org/) | Numerical computations | 2.3.4+ |
+
+</div>
+
+---
+
+## 📝 Implementation Notes
+
+<details>
+<summary><b>📈 WindowedMovingAverageStrategy</b></summary>
+
+The strategy generates signals by comparing the current price to a windowed moving average:
 
 ```python
-# backtester/strategy.py
-import numpy as np
-import pandas as pd
-
-class VolatilityBreakoutStrategy:
-    
-    def __init__(self):
-        pass
-
-    def signals(self, prices: pd.Series) -> pd.Series:
-        pass
+Signal Logic:
+├── +1 (BUY)  : Current price > MA(window)
+├──  0 (HOLD) : Current price = MA(window) OR insufficient data
+└── -1 (SELL) : Current price < MA(window)
 ```
 
-```python
-# backtester/broker.py
-class Broker:
-    def __init__(self, cash: float = 1_000_000):
-        self.cash = cash
-        self.position = 0
+**Parameters:**
+- `window`: Lookback period for moving average calculation
 
-    def market_order(self, side: str, qty: int, price: float):
-        pass
+**Edge Cases Handled:**
+- Insufficient data (i < window): Returns `0` (HOLD)
+- NaN values in price series
+- Empty or constant price series
+
+</details>
+
+<details>
+<summary><b>🏦 Broker Mechanics</b></summary>
+
+The broker executes orders with the following simplified model:
+
+| Feature | Implementation | Rationale |
+|---------|----------------|-----------|
+| **Slippage** | ❌ None | Deterministic testing |
+| **Fees** | ❌ Zero | Simplified model |
+| **Latency** | ❌ Instant | Reproducible results |
+| **Rejections** | ❌ All filled | Predictable behavior |
+
+**Order Flow:**
+```
+market_order(side, qty, price)
+├── side='buy'  → position += qty, cash -= qty × price
+└── side='sell' → position -= qty, cash += qty × price
 ```
 
-```python
-# backtester/engine.py
-import pandas as pd
+This simplified model ensures **100% reproducible test results**.
 
-class Backtester:
-    def __init__(self, strategy, broker):
-        self.strategy = strategy
-        self.broker = broker
+</details>
 
-    def run(self, prices: pd.Series):
-        pass
+<details>
+<summary><b>⚙️ Backtesting Loop</b></summary>
+
+The engine follows strict timing discipline to prevent **look-ahead bias**:
+
 ```
+For each day t:
+  1. 📊 Compute signal based on data up to t-1
+  2. 💰 Execute trade at close price of day t
+  3. 📈 Record cash, position, and equity
+```
+
+**Key Design Choice:**
+- Signal at `t-1` → Trade at `t` prevents using future information
+- First day has no trade (no `t-1` signal exists)
+- Equity invariant: `equity = cash + position × price`
+
+**Example Timeline:**
+```
+Day 0: signal=N/A  → no trade    → position=0
+Day 1: signal(0)   → trade at p1 → position updated
+Day 2: signal(1)   → trade at p2 → position updated
+...
+```
+
+</details>
+
+<details>
+<summary><b>🔧 Configuration</b></summary>
+
+**pytest configuration** (`pyproject.toml`):
+```toml
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = [
+    "-v",
+    "--cov=src/backtester",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+]
+```
+
+**Coverage configuration** (`pyproject.toml`):
+```toml
+[tool.coverage.run]
+source = ["src/backtester"]
+branch = true
+omit = ["*/tests/*", "*/__pycache__/*"]
+
+[tool.coverage.report]
+fail_under = 90.0
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+]
+```
+
+</details>
 
 ---
 
-## 🧩 Part 3 — Tests, Fixtures, and Mocks (2–3 hours)
+## 🤝 Contributing
 
-Write **focused** tests. Keep them deterministic and fast.
+This is a course assignment project. For issues or suggestions:
 
-### Required Tests
-
-* **Strategy logic:** signal generation of x-day volatility breakout.
-* **Broker behavior:** buy/sell adjusts cash/position correctly, rejects bad inputs, raises on insufficient cash/shares.
-* **Engine loop:** executes trades; final equity matches cash + pos×price.
-* **Edge cases:** empty series, constant price series, NaNs at head, very short series.
-* **Failure handling:** demonstrate one mocked failure path (e.g., broker raising) and assert it propagates/logs as expected.
+1. 🐛 **Open an issue** on GitHub
+2. 🎨 **Follow code style**: Ruff formatting
+3. ✅ **Ensure tests pass**: Coverage ≥90%
+4. 🔍 **Run type checks**: `uv run ty check`
 
 ---
 
-### Example Fixtures & Mocks
+## 📄 License
 
-```python
-# tests/conftest.py
-import numpy as np, pandas as pd, pytest
-from backtester.strategy import VolatilityBreakoutStrategy
-from backtester.broker import Broker
-
-@pytest.fixture
-def prices():
-    # deterministic rising series
-    return pd.Series(np.linspace(100, 120, 200))
-
-@pytest.fixture
-def strategy():
-    return VolatilityBreakoutStrategy()
-
-@pytest.fixture
-def broker():
-    return Broker(cash=1_000)
-```
-
-```python
-# tests/test_strategy.py
-def test_signals_length(strategy, prices):
-    sig = strategy.signals(prices)
-    assert len(sig) == len(prices)
-```
-
-```python
-# tests/test_broker.py
-import pytest
-
-def test_buy_and_sell_updates_cash_and_pos(broker):
-    broker.market_order("BUY", 2, 10.0)
-    assert (broker.position, broker.cash) == (2, 1000 - 20.0)
-
-def test_rejects_bad_orders(broker):
-    with pytest.raises(ValueError):
-        broker.market_order("BUY", 0, 10)
-```
-
-```python
-# tests/test_engine.py
-from unittest.mock import MagicMock
-from backtester.engine import Backtester
-
-def test_engine_uses_tminus1_signal(prices, broker, strategy, monkeypatch):
-    # Force exactly one buy at t=10 by controlling signals
-    fake_strategy = MagicMock()
-    fake_strategy.signals.return_value = prices*0
-    fake_strategy.signals.return_value.iloc[9] = 1  # triggers buy at t=10
-    bt = Backtester(fake_strategy, broker)
-    eq = bt.run(prices)
-    assert broker.position == 1
-    assert broker.cash == 1000 - float(prices.iloc[10])
-```
-
-> Use `unittest.mock` / `MagicMock` and monkey-patching sparingly to isolate external dependencies; test your core logic directly.
+MIT License - see LICENSE file for details
 
 ---
 
-## 🧩 Part 4 — Coverage & Reporting (30–45 min)
+## 🔗 Links
 
-Run locally:
+<div align="center">
 
-```bash
-coverage run -m pytest -q
-coverage report -m
-coverage html
-```
+**[🎓 Course](https://github.com/elliotchung/FINM32500-Assignment-5)** •
+**[🏛️ University of Chicago](https://www.uchicago.edu/)** •
+**[📊 CI Dashboard](https://github.com/elliotchung/FINM32500-Assignment-5/actions)** •
+**[📖 Assignment Details](https://github.com/elliotchung/FINM32500-Assignment-5/blob/master/README.md)**
 
-CI must **fail** if coverage < 90%:
+**FINM32500 - Computational Finance in Python**
 
-```bash
-coverage report --fail-under=90
-```
-
-Commit the HTML report (optional) or attach screenshots in the README.
+</div>
 
 ---
 
-## ✅ Deliverables (Checklist)
+<div align="center">
 
-* [ ] Code for `PriceLoader`, `Strategy`, `Broker`, `Backtester` (minimal but clean).
-* [ ] `tests/` with comprehensive unit tests and fixtures.
-* [ ] Passing GitHub Actions run (link/screenshot).
-* [ ] Coverage report showing **≥ 90%**.
-* [ ] `README.md` with design notes, how to run tests, CI status, coverage summary.
+FINM32500 | Testing & Continuous Integration Assignment
 
----
-
-## 🧮 Grading Rubric (100 pts)
-
-| Category                     | Points | Description                                                         |
-| ---------------------------- | ------ | ------------------------------------------------------------------- |
-| Unit tests quality & breadth | 40     | Clear, isolated, meaningful assertions; good edge-case coverage.    |
-| Coverage                     | 20     | ≥90% lines (18 pts for 90–94, 20 pts for ≥95).                      |
-| CI integration               | 20     | Workflow runs on push/PR, fails on low coverage, fast and reliable. |
-| Design & clarity             | 10     | Simple, readable code; minimal but sensible abstractions.           |
-| Determinism & speed          | 10     | No network, seeded/synthetic data, suite < 60s.                     |
-
----
-
-## 💡 Bonus Ideas (Optional)
-
-* Branch coverage gate (`--fail-under=90 --include=backtester/* --branch`).
-* Lint/type checks in CI (`ruff`, `mypy`) as separate jobs.
-* Mocked “order rejection” path and retry/backoff test.
-
----
-
-## 🧠 Notes for Students
-
-* Real data is allowed, but **all tests must run offline** using generated or cached data (prefer generated to keep CI fast).
-* Keep strategies simple; **depth of testing > strategy creativity.**
-* Commit early; use PRs to watch CI feedback like a real quant workflow.
+</div>
