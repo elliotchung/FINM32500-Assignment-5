@@ -581,12 +581,8 @@ MIT License - see LICENSE file for details
 
 <div align="center">
 
-**[🎓 Course](https://github.com/elliotchung/FINM32500-Assignment-5)** •
-**[🏛️ University of Chicago](https://www.uchicago.edu/)** •
 **[📊 CI Dashboard](https://github.com/elliotchung/FINM32500-Assignment-5/actions)** •
-**[📖 Assignment Details](https://github.com/elliotchung/FINM32500-Assignment-5/blob/master/README.md)**
-
-**FINM32500 - Computational Finance in Python**
+**[📖 Template Repo](https://github.com/hyoung3/assignment5-testing-CI)**
 
 </div>
 
@@ -594,6 +590,6 @@ MIT License - see LICENSE file for details
 
 <div align="center">
 
-FINM32500 | Testing & Continuous Integration Assignment
+FINM32500 - Computational Finance in Python | Testing & Continuous Integration Assignment
 
 </div>
