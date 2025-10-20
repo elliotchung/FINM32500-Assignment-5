@@ -146,6 +146,42 @@ jobs:
           uv run coverage report || true >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
+      - name: Generate coverage badge
+        if: always() && github.ref == 'refs/heads/master'
+        run: |
+          # Extract coverage percentage
+          COVERAGE=$(uv run coverage report | grep "^TOTAL" | awk '{print $NF}' | sed 's/%//')
+
+          # Determine badge color
+          if (( $(echo "$COVERAGE >= 95" | bc -l) )); then
+            COLOR="brightgreen"
+          elif (( $(echo "$COVERAGE >= 90" | bc -l) )); then
+            COLOR="green"
+          elif (( $(echo "$COVERAGE >= 75" | bc -l) )); then
+            COLOR="yellow"
+          elif (( $(echo "$COVERAGE >= 60" | bc -l) )); then
+            COLOR="orange"
+          else
+            COLOR="red"
+          fi
+
+          # Create badges directory if it doesn't exist
+          mkdir -p badges
+
+          # Download badge from shields.io
+          curl -o badges/coverage.svg "https://img.shields.io/badge/coverage-${COVERAGE}%25-${COLOR}"
+
+      - name: Commit coverage badge
+        if: always() && github.ref == 'refs/heads/master' && github.event_name == 'push'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add badges/coverage.svg
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: update coverage badge [skip ci]"
+            git push
+          fi
+
       - name: Upload coverage to GitHub
         uses: actions/upload-artifact@v4
         if: always()
