@@ -3,7 +3,11 @@ import datetime
 import csv
 import os
 import tempfile
-from src.backtester.data_generator import MarketDataPoint, market_data_generator, generate_market_csv
+from src.backtester.data_generator import (
+    MarketDataPoint,
+    market_data_generator,
+    generate_market_csv,
+)
 
 
 class TestMarketDataPointInDataGenerator:
@@ -47,20 +51,26 @@ class TestMarketDataGenerator:
 
     def test_generator_price_changes(self):
         """Test that prices change over time"""
-        gen = market_data_generator(symbol="AAPL", start_price=150.0, volatility=0.01, interval=0.0)
+        gen = market_data_generator(
+            symbol="AAPL", start_price=150.0, volatility=0.01, interval=0.0
+        )
         prices = [next(gen).price for _ in range(100)]
         # Not all prices should be the same (very unlikely with random walk)
         assert len(set(prices)) > 1
 
     def test_generator_prices_positive(self):
         """Test that generated prices stay positive"""
-        gen = market_data_generator(symbol="AAPL", start_price=150.0, volatility=0.01, interval=0.0)
+        gen = market_data_generator(
+            symbol="AAPL", start_price=150.0, volatility=0.01, interval=0.0
+        )
         prices = [next(gen).price for _ in range(100)]
         assert all(price > 0 for price in prices)
 
     def test_generator_price_rounding(self):
         """Test that prices are rounded to 2 decimal places"""
-        gen = market_data_generator(symbol="AAPL", start_price=150.0, volatility=0.01, interval=0.0)
+        gen = market_data_generator(
+            symbol="AAPL", start_price=150.0, volatility=0.01, interval=0.0
+        )
         ticks = [next(gen) for _ in range(50)]
         for tick in ticks:
             # Check that price has at most 2 decimal places
@@ -75,29 +85,40 @@ class TestMarketDataGenerator:
 
     def test_generator_volatility_zero(self):
         """Test generator with zero volatility"""
-        gen = market_data_generator(symbol="AAPL", start_price=150.0, volatility=0.0, interval=0.0)
+        gen = market_data_generator(
+            symbol="AAPL", start_price=150.0, volatility=0.0, interval=0.0
+        )
         prices = [next(gen).price for _ in range(10)]
         # With zero volatility, prices should all be very close to start price
         assert all(abs(price - 150.0) < 0.5 for price in prices)
 
     def test_generator_high_volatility(self):
         """Test generator with higher volatility creates more variation"""
-        gen_low = market_data_generator(symbol="AAPL", start_price=150.0, volatility=0.001, interval=0.0)
-        gen_high = market_data_generator(symbol="AAPL", start_price=150.0, volatility=0.1, interval=0.0)
+        gen_low = market_data_generator(
+            symbol="AAPL", start_price=150.0, volatility=0.001, interval=0.0
+        )
+        gen_high = market_data_generator(
+            symbol="AAPL", start_price=150.0, volatility=0.1, interval=0.0
+        )
 
         prices_low = [next(gen_low).price for _ in range(100)]
         prices_high = [next(gen_high).price for _ in range(100)]
 
         # Higher volatility should create larger price movements
         import numpy as np
+
         std_low = np.std(prices_low)
         std_high = np.std(prices_high)
         assert std_high > std_low
 
     def test_generator_different_start_prices(self):
         """Test generator with different start prices"""
-        gen1 = market_data_generator(symbol="AAPL", start_price=100.0, volatility=0.0, interval=0.0)
-        gen2 = market_data_generator(symbol="AAPL", start_price=200.0, volatility=0.0, interval=0.0)
+        gen1 = market_data_generator(
+            symbol="AAPL", start_price=100.0, volatility=0.0, interval=0.0
+        )
+        gen2 = market_data_generator(
+            symbol="AAPL", start_price=200.0, volatility=0.0, interval=0.0
+        )
 
         price1 = next(gen1).price
         price2 = next(gen2).price
@@ -123,7 +144,7 @@ class TestGenerateMarketCSV:
                 start_price=150.0,
                 filename=filename,
                 num_ticks=10,
-                interval=0.0
+                interval=0.0,
             )
             assert os.path.exists(filename)
 
@@ -136,10 +157,10 @@ class TestGenerateMarketCSV:
                 start_price=150.0,
                 filename=filename,
                 num_ticks=20,
-                interval=0.0
+                interval=0.0,
             )
 
-            with open(filename, 'r') as f:
+            with open(filename, "r") as f:
                 reader = csv.reader(f)
                 rows = list(reader)
                 # 1 header + 20 data rows
@@ -154,10 +175,10 @@ class TestGenerateMarketCSV:
                 start_price=150.0,
                 filename=filename,
                 num_ticks=5,
-                interval=0.0
+                interval=0.0,
             )
 
-            with open(filename, 'r') as f:
+            with open(filename, "r") as f:
                 reader = csv.reader(f)
                 header = next(reader)
                 assert header == ["timestamp", "symbol", "price"]
@@ -171,10 +192,10 @@ class TestGenerateMarketCSV:
                 start_price=150.0,
                 filename=filename,
                 num_ticks=5,
-                interval=0.0
+                interval=0.0,
             )
 
-            with open(filename, 'r') as f:
+            with open(filename, "r") as f:
                 reader = csv.reader(f)
                 next(reader)  # Skip header
                 for row in reader:
@@ -195,10 +216,10 @@ class TestGenerateMarketCSV:
                 start_price=2800.0,
                 filename=filename,
                 num_ticks=5,
-                interval=0.0
+                interval=0.0,
             )
 
-            with open(filename, 'r') as f:
+            with open(filename, "r") as f:
                 reader = csv.reader(f)
                 next(reader)  # Skip header
                 for row in reader:
@@ -213,10 +234,10 @@ class TestGenerateMarketCSV:
                 start_price=150.0,
                 filename=filename,
                 num_ticks=50,
-                interval=0.0
+                interval=0.0,
             )
 
-            with open(filename, 'r') as f:
+            with open(filename, "r") as f:
                 reader = csv.reader(f)
                 rows = list(reader)
                 assert len(rows) == 51  # header + 50 rows
@@ -231,10 +252,10 @@ class TestGenerateMarketCSV:
                 filename=filename,
                 num_ticks=10,
                 volatility=0.05,
-                interval=0.0
+                interval=0.0,
             )
 
-            with open(filename, 'r') as f:
+            with open(filename, "r") as f:
                 reader = csv.reader(f)
                 next(reader)  # Skip header
                 prices = [float(row[2]) for row in reader]
@@ -250,10 +271,10 @@ class TestGenerateMarketCSV:
                 filename=filename,
                 num_ticks=100,
                 volatility=0.02,
-                interval=0.0
+                interval=0.0,
             )
 
-            with open(filename, 'r') as f:
+            with open(filename, "r") as f:
                 reader = csv.reader(f)
                 next(reader)  # Skip header
                 prices = [float(row[2]) for row in reader]
@@ -271,7 +292,7 @@ class TestGenerateMarketCSV:
                 start_price=150.0,
                 filename=filename,
                 num_ticks=5,
-                interval=0.0
+                interval=0.0,
             )
 
             # Create second file with different num_ticks
@@ -280,10 +301,10 @@ class TestGenerateMarketCSV:
                 start_price=150.0,
                 filename=filename,
                 num_ticks=10,
-                interval=0.0
+                interval=0.0,
             )
 
-            with open(filename, 'r') as f:
+            with open(filename, "r") as f:
                 reader = csv.reader(f)
                 rows = list(reader)
                 # Should have 10 ticks (not 5)
@@ -298,10 +319,10 @@ class TestGenerateMarketCSV:
                 start_price=150.0,
                 filename=filename,
                 num_ticks=10,
-                interval=0.0
+                interval=0.0,
             )
 
-            with open(filename, 'r') as f:
+            with open(filename, "r") as f:
                 reader = csv.reader(f)
                 next(reader)  # Skip header
                 for row in reader:

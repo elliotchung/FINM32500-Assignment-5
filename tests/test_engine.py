@@ -28,7 +28,9 @@ class TestBacktester:
 
     def test_run_no_trades(self):
         """Test running backtest with no trading signals"""
-        prices = pd.Series([100, 101, 102, 103, 104], index=pd.date_range("2025-01-01", periods=5))
+        prices = pd.Series(
+            [100, 101, 102, 103, 104], index=pd.date_range("2025-01-01", periods=5)
+        )
         strategy = MockStrategy([0, 0, 0, 0, 0])
         broker = Broker(cash=10000)
         backtester = Backtester(strategy=strategy, broker=broker)
@@ -43,7 +45,9 @@ class TestBacktester:
 
     def test_run_single_buy(self):
         """Test backtest with a single buy signal"""
-        prices = pd.Series([100, 101, 102, 103, 104], index=pd.date_range("2025-01-01", periods=5))
+        prices = pd.Series(
+            [100, 101, 102, 103, 104], index=pd.date_range("2025-01-01", periods=5)
+        )
         # First signal is used at t=1, so signal at index 0 triggers trade at index 1
         strategy = MockStrategy([1, 0, 0, 0, 0])
         broker = Broker(cash=10000)
@@ -66,7 +70,9 @@ class TestBacktester:
 
     def test_run_single_sell(self):
         """Test backtest with a single sell signal"""
-        prices = pd.Series([100, 101, 102, 103, 104], index=pd.date_range("2025-01-01", periods=5))
+        prices = pd.Series(
+            [100, 101, 102, 103, 104], index=pd.date_range("2025-01-01", periods=5)
+        )
         strategy = MockStrategy([-1, 0, 0, 0, 0])
         broker = Broker(cash=10000)
         backtester = Backtester(strategy=strategy, broker=broker)
@@ -82,7 +88,9 @@ class TestBacktester:
 
     def test_run_buy_then_sell(self):
         """Test backtest with buy followed by sell"""
-        prices = pd.Series([100, 101, 102, 103, 104], index=pd.date_range("2025-01-01", periods=5))
+        prices = pd.Series(
+            [100, 101, 102, 103, 104], index=pd.date_range("2025-01-01", periods=5)
+        )
         strategy = MockStrategy([1, 0, -1, 0, 0])
         broker = Broker(cash=10000)
         backtester = Backtester(strategy=strategy, broker=broker)
@@ -105,7 +113,9 @@ class TestBacktester:
 
     def test_run_equity_calculation(self):
         """Test that equity is calculated correctly"""
-        prices = pd.Series([100, 101, 102, 103, 104], index=pd.date_range("2025-01-01", periods=5))
+        prices = pd.Series(
+            [100, 101, 102, 103, 104], index=pd.date_range("2025-01-01", periods=5)
+        )
         strategy = MockStrategy([1, 0, 0, 0, 0])
         broker = Broker(cash=10000)
         backtester = Backtester(strategy=strategy, broker=broker)
@@ -116,16 +126,25 @@ class TestBacktester:
         assert results["equity"].iloc[0] == 10000.0
 
         # Day 1: equity = cash + position * price
-        expected_equity = results["cash"].iloc[1] + results["position"].iloc[1] * results["price"].iloc[1]
+        expected_equity = (
+            results["cash"].iloc[1]
+            + results["position"].iloc[1] * results["price"].iloc[1]
+        )
         assert results["equity"].iloc[1] == pytest.approx(expected_equity)
 
         # Day 4: equity should reflect position value at current price
-        expected_equity = results["cash"].iloc[4] + results["position"].iloc[4] * results["price"].iloc[4]
+        expected_equity = (
+            results["cash"].iloc[4]
+            + results["position"].iloc[4] * results["price"].iloc[4]
+        )
         assert results["equity"].iloc[4] == pytest.approx(expected_equity)
 
     def test_run_multiple_trades(self):
         """Test backtest with multiple trades"""
-        prices = pd.Series([100, 101, 102, 103, 104, 105, 106], index=pd.date_range("2025-01-01", periods=7))
+        prices = pd.Series(
+            [100, 101, 102, 103, 104, 105, 106],
+            index=pd.date_range("2025-01-01", periods=7),
+        )
         strategy = MockStrategy([1, 0, -1, 0, 1, 0, -1])
         broker = Broker(cash=10000)
         backtester = Backtester(strategy=strategy, broker=broker)
@@ -139,7 +158,9 @@ class TestBacktester:
 
     def test_run_increasing_prices(self):
         """Test backtest with steadily increasing prices"""
-        prices = pd.Series(np.linspace(100, 120, 20), index=pd.date_range("2025-01-01", periods=20))
+        prices = pd.Series(
+            np.linspace(100, 120, 20), index=pd.date_range("2025-01-01", periods=20)
+        )
         strategy = WindowedMovingAverageStrategy(window=5)
         broker = Broker(cash=10000)
         backtester = Backtester(strategy=strategy, broker=broker)
@@ -154,7 +175,9 @@ class TestBacktester:
 
     def test_run_decreasing_prices(self):
         """Test backtest with steadily decreasing prices"""
-        prices = pd.Series(np.linspace(120, 100, 20), index=pd.date_range("2025-01-01", periods=20))
+        prices = pd.Series(
+            np.linspace(120, 100, 20), index=pd.date_range("2025-01-01", periods=20)
+        )
         strategy = WindowedMovingAverageStrategy(window=5)
         broker = Broker(cash=10000)
         backtester = Backtester(strategy=strategy, broker=broker)
@@ -179,7 +202,9 @@ class TestBacktester:
 
     def test_run_price_values_in_results(self):
         """Test that price values are correctly stored in results"""
-        prices = pd.Series([100, 101, 102, 103, 104], index=pd.date_range("2025-01-01", periods=5))
+        prices = pd.Series(
+            [100, 101, 102, 103, 104], index=pd.date_range("2025-01-01", periods=5)
+        )
         strategy = MockStrategy([0, 0, 0, 0, 0])
         broker = Broker(cash=10000)
         backtester = Backtester(strategy=strategy, broker=broker)
@@ -190,7 +215,9 @@ class TestBacktester:
 
     def test_run_first_day_no_trade(self):
         """Test that no trade occurs on the first day"""
-        prices = pd.Series([100, 101, 102], index=pd.date_range("2025-01-01", periods=3))
+        prices = pd.Series(
+            [100, 101, 102], index=pd.date_range("2025-01-01", periods=3)
+        )
         # Even with a buy signal on day 0, no trade should occur
         strategy = MockStrategy([1, 1, 1])
         broker = Broker(cash=10000)
@@ -207,7 +234,7 @@ class TestBacktester:
         np.random.seed(42)
         prices = pd.Series(
             100 * (1 + np.random.randn(50) * 0.02).cumprod(),
-            index=pd.date_range("2025-01-01", periods=50)
+            index=pd.date_range("2025-01-01", periods=50),
         )
         strategy = WindowedMovingAverageStrategy(window=10)
         broker = Broker(cash=10000)
@@ -221,7 +248,9 @@ class TestBacktester:
 
     def test_run_signal_lag(self):
         """Test that signals are properly lagged (t-1 signal used at t)"""
-        prices = pd.Series([100, 100, 100, 100], index=pd.date_range("2025-01-01", periods=4))
+        prices = pd.Series(
+            [100, 100, 100, 100], index=pd.date_range("2025-01-01", periods=4)
+        )
         # Signal at index 1 should trigger trade at index 2
         strategy = MockStrategy([0, 1, 0, 0])
         broker = Broker(cash=10000)
@@ -238,7 +267,9 @@ class TestBacktester:
 
     def test_run_accumulation(self):
         """Test accumulating positions with multiple buy signals"""
-        prices = pd.Series([100, 100, 100, 100, 100], index=pd.date_range("2025-01-01", periods=5))
+        prices = pd.Series(
+            [100, 100, 100, 100, 100], index=pd.date_range("2025-01-01", periods=5)
+        )
         strategy = MockStrategy([1, 1, 1, 0, 0])
         broker = Broker(cash=10000)
         backtester = Backtester(strategy=strategy, broker=broker)
@@ -252,7 +283,9 @@ class TestBacktester:
 
     def test_run_distribution(self):
         """Test distributing positions with multiple sell signals"""
-        prices = pd.Series([100, 100, 100, 100, 100, 100], index=pd.date_range("2025-01-01", periods=6))
+        prices = pd.Series(
+            [100, 100, 100, 100, 100, 100], index=pd.date_range("2025-01-01", periods=6)
+        )
         # Buy three times, then sell three times
         strategy = MockStrategy([1, 1, 1, -1, -1, -1])
         broker = Broker(cash=10000)

@@ -1,4 +1,3 @@
-import pytest
 import pandas as pd
 import numpy as np
 from src.backtester.price_loader import load_prices_from_generator
@@ -8,46 +7,31 @@ class TestLoadPricesFromGenerator:
     def test_returns_series(self):
         """Test that function returns a pandas Series"""
         result = load_prices_from_generator(
-            symbol="AAPL",
-            start_price=150.0,
-            num_ticks=10,
-            interval=0.0
+            symbol="AAPL", start_price=150.0, num_ticks=10, interval=0.0
         )
         assert isinstance(result, pd.Series)
 
     def test_correct_length(self):
         """Test that returned series has correct length"""
         result = load_prices_from_generator(
-            symbol="AAPL",
-            start_price=150.0,
-            num_ticks=20,
-            interval=0.0
+            symbol="AAPL", start_price=150.0, num_ticks=20, interval=0.0
         )
         assert len(result) == 20
 
     def test_correct_symbol_name(self):
         """Test that series has correct symbol as name"""
         result = load_prices_from_generator(
-            symbol="GOOGL",
-            start_price=2800.0,
-            num_ticks=10,
-            interval=0.0
+            symbol="GOOGL", start_price=2800.0, num_ticks=10, interval=0.0
         )
         assert result.name == "GOOGL"
 
     def test_different_symbols(self):
         """Test with different symbols"""
         result_aapl = load_prices_from_generator(
-            symbol="AAPL",
-            start_price=150.0,
-            num_ticks=10,
-            interval=0.0
+            symbol="AAPL", start_price=150.0, num_ticks=10, interval=0.0
         )
         result_googl = load_prices_from_generator(
-            symbol="GOOGL",
-            start_price=2800.0,
-            num_ticks=10,
-            interval=0.0
+            symbol="GOOGL", start_price=2800.0, num_ticks=10, interval=0.0
         )
 
         assert result_aapl.name == "AAPL"
@@ -56,10 +40,7 @@ class TestLoadPricesFromGenerator:
     def test_index_is_datetime(self):
         """Test that index contains datetime objects"""
         result = load_prices_from_generator(
-            symbol="AAPL",
-            start_price=150.0,
-            num_ticks=10,
-            interval=0.0
+            symbol="AAPL", start_price=150.0, num_ticks=10, interval=0.0
         )
         assert all(isinstance(idx, pd.Timestamp) for idx in result.index)
 
@@ -70,25 +51,17 @@ class TestLoadPricesFromGenerator:
             start_price=150.0,
             num_ticks=100,
             volatility=0.01,
-            interval=0.0
+            interval=0.0,
         )
         assert all(result > 0)
 
     def test_start_price_influence(self):
         """Test that start_price influences the generated prices"""
         result_low = load_prices_from_generator(
-            symbol="AAPL",
-            start_price=50.0,
-            num_ticks=10,
-            volatility=0.0,
-            interval=0.0
+            symbol="AAPL", start_price=50.0, num_ticks=10, volatility=0.0, interval=0.0
         )
         result_high = load_prices_from_generator(
-            symbol="AAPL",
-            start_price=500.0,
-            num_ticks=10,
-            volatility=0.0,
-            interval=0.0
+            symbol="AAPL", start_price=500.0, num_ticks=10, volatility=0.0, interval=0.0
         )
 
         # Mean of low prices should be around 50
@@ -100,22 +73,13 @@ class TestLoadPricesFromGenerator:
     def test_num_ticks_parameter(self):
         """Test different values of num_ticks"""
         result_10 = load_prices_from_generator(
-            symbol="AAPL",
-            start_price=150.0,
-            num_ticks=10,
-            interval=0.0
+            symbol="AAPL", start_price=150.0, num_ticks=10, interval=0.0
         )
         result_50 = load_prices_from_generator(
-            symbol="AAPL",
-            start_price=150.0,
-            num_ticks=50,
-            interval=0.0
+            symbol="AAPL", start_price=150.0, num_ticks=50, interval=0.0
         )
         result_100 = load_prices_from_generator(
-            symbol="AAPL",
-            start_price=150.0,
-            num_ticks=100,
-            interval=0.0
+            symbol="AAPL", start_price=150.0, num_ticks=100, interval=0.0
         )
 
         assert len(result_10) == 10
@@ -129,14 +93,14 @@ class TestLoadPricesFromGenerator:
             start_price=150.0,
             num_ticks=100,
             volatility=0.001,
-            interval=0.0
+            interval=0.0,
         )
         result_high_vol = load_prices_from_generator(
             symbol="AAPL",
             start_price=150.0,
             num_ticks=100,
             volatility=0.1,
-            interval=0.0
+            interval=0.0,
         )
 
         # Higher volatility should create more variation
@@ -147,11 +111,7 @@ class TestLoadPricesFromGenerator:
     def test_zero_volatility(self):
         """Test with zero volatility"""
         result = load_prices_from_generator(
-            symbol="AAPL",
-            start_price=150.0,
-            num_ticks=20,
-            volatility=0.0,
-            interval=0.0
+            symbol="AAPL", start_price=150.0, num_ticks=20, volatility=0.0, interval=0.0
         )
         # With zero volatility, prices should be very stable
         assert result.std() < 1.0
@@ -163,7 +123,7 @@ class TestLoadPricesFromGenerator:
             start_price=150.0,
             num_ticks=100,
             volatility=0.05,
-            interval=0.0
+            interval=0.0,
         )
         # Should have significant variation
         assert result.std() > 0
@@ -171,20 +131,14 @@ class TestLoadPricesFromGenerator:
     def test_interval_zero(self):
         """Test that interval=0 works (no sleep between ticks)"""
         result = load_prices_from_generator(
-            symbol="AAPL",
-            start_price=150.0,
-            num_ticks=10,
-            interval=0.0
+            symbol="AAPL", start_price=150.0, num_ticks=10, interval=0.0
         )
         assert len(result) == 10
 
     def test_timestamps_monotonic_increasing(self):
         """Test that timestamps are monotonically increasing"""
         result = load_prices_from_generator(
-            symbol="AAPL",
-            start_price=150.0,
-            num_ticks=20,
-            interval=0.0
+            symbol="AAPL", start_price=150.0, num_ticks=20, interval=0.0
         )
         # Check that index is sorted
         assert result.index.is_monotonic_increasing
@@ -192,20 +146,14 @@ class TestLoadPricesFromGenerator:
     def test_no_duplicate_timestamps(self):
         """Test that there are no duplicate timestamps"""
         result = load_prices_from_generator(
-            symbol="AAPL",
-            start_price=150.0,
-            num_ticks=20,
-            interval=0.0
+            symbol="AAPL", start_price=150.0, num_ticks=20, interval=0.0
         )
         assert not result.index.has_duplicates
 
     def test_single_tick(self):
         """Test generating a single tick"""
         result = load_prices_from_generator(
-            symbol="AAPL",
-            start_price=150.0,
-            num_ticks=1,
-            interval=0.0
+            symbol="AAPL", start_price=150.0, num_ticks=1, interval=0.0
         )
         assert len(result) == 1
         assert result.iloc[0] > 0
@@ -213,30 +161,21 @@ class TestLoadPricesFromGenerator:
     def test_many_ticks(self):
         """Test generating many ticks"""
         result = load_prices_from_generator(
-            symbol="AAPL",
-            start_price=150.0,
-            num_ticks=500,
-            interval=0.0
+            symbol="AAPL", start_price=150.0, num_ticks=500, interval=0.0
         )
         assert len(result) == 500
 
     def test_price_values_are_float(self):
         """Test that price values are floats"""
         result = load_prices_from_generator(
-            symbol="AAPL",
-            start_price=150.0,
-            num_ticks=10,
-            interval=0.0
+            symbol="AAPL", start_price=150.0, num_ticks=10, interval=0.0
         )
         assert all(isinstance(price, (float, np.floating)) for price in result.values)
 
     def test_series_properties(self):
         """Test various pandas Series properties"""
         result = load_prices_from_generator(
-            symbol="AAPL",
-            start_price=150.0,
-            num_ticks=20,
-            interval=0.0
+            symbol="AAPL", start_price=150.0, num_ticks=20, interval=0.0
         )
 
         # Should be able to access via iloc
@@ -251,10 +190,7 @@ class TestLoadPricesFromGenerator:
     def test_integration_with_pandas_operations(self):
         """Test that result integrates well with pandas operations"""
         result = load_prices_from_generator(
-            symbol="AAPL",
-            start_price=150.0,
-            num_ticks=50,
-            interval=0.0
+            symbol="AAPL", start_price=150.0, num_ticks=50, interval=0.0
         )
 
         # Should be able to calculate rolling mean
@@ -268,25 +204,17 @@ class TestLoadPricesFromGenerator:
     def test_different_start_prices(self):
         """Test with various start prices"""
         result_low = load_prices_from_generator(
-            symbol="PENNY",
-            start_price=1.0,
-            num_ticks=10,
-            volatility=0.0,
-            interval=0.0
+            symbol="PENNY", start_price=1.0, num_ticks=10, volatility=0.0, interval=0.0
         )
         result_mid = load_prices_from_generator(
-            symbol="MID",
-            start_price=100.0,
-            num_ticks=10,
-            volatility=0.0,
-            interval=0.0
+            symbol="MID", start_price=100.0, num_ticks=10, volatility=0.0, interval=0.0
         )
         result_high = load_prices_from_generator(
             symbol="HIGH",
             start_price=10000.0,
             num_ticks=10,
             volatility=0.0,
-            interval=0.0
+            interval=0.0,
         )
 
         assert 0.5 < result_low.mean() < 2.0
@@ -300,14 +228,14 @@ class TestLoadPricesFromGenerator:
             start_price=150.0,
             num_ticks=50,
             volatility=0.02,
-            interval=0.0
+            interval=0.0,
         )
         result2 = load_prices_from_generator(
             symbol="AAPL",
             start_price=150.0,
             num_ticks=50,
             volatility=0.02,
-            interval=0.0
+            interval=0.0,
         )
 
         # Results should be different (random walk)
@@ -320,7 +248,7 @@ class TestLoadPricesFromGenerator:
             start_price=150.0,
             num_ticks=50,
             volatility=0.01,
-            interval=0.0
+            interval=0.0,
         )
 
         for price in result.values:
@@ -331,11 +259,7 @@ class TestLoadPricesFromGenerator:
         """Test with edge case parameters"""
         # Very small start price
         result = load_prices_from_generator(
-            symbol="AAPL",
-            start_price=0.01,
-            num_ticks=10,
-            volatility=0.0,
-            interval=0.0
+            symbol="AAPL", start_price=0.01, num_ticks=10, volatility=0.0, interval=0.0
         )
         assert len(result) == 10
         assert all(result > 0)
