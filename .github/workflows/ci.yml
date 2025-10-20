@@ -1,36 +1,7 @@
 name: Assignment 5 - testing and CI Pipeline
 on: [push, pull_request]
 jobs:
-  update-requirements:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-
-      - uses: astral-sh/setup-uv@v6
-
-      - name: Compile requirements.txt
-        run: |
-          uv pip compile pyproject.toml -o requirements.txt --all-extras --group dev --universal -q
-
-      - name: Commit and push updated requirements.txt
-        if: github.event_name == 'push'
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add requirements.txt
-          if ! git diff --staged --quiet; then
-            git commit -m "chore: update requirements.txt from pyproject.toml"
-            git push
-          fi
-  ruff:
+  auto-fixes:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -48,23 +19,29 @@ jobs:
       - name: Install dependencies
         run: uv sync --locked --all-extras --dev
 
+      - name: Compile requirements.txt
+        run: |
+          uv pip compile pyproject.toml -o requirements.txt --all-extras --group dev --universal -q
+
       - name: Run ruff check with fixes
         run: uv run ruff check --fix
 
       - name: Run ruff format
         run: uv run ruff format
 
-      - name: Commit and push changes
+      - name: Commit and push all auto-fixes
         if: github.event_name == 'push'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add -A
           if ! git diff --staged --quiet; then
-            git commit -m "style: apply ruff formatting and fixes"
+            git commit -m "chore: auto-update requirements and apply ruff formatting"
             git push
           fi
+
   test:
+    needs: auto-fixes
     runs-on: ubuntu-latest
     permissions:
       contents: write
